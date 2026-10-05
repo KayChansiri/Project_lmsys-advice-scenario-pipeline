@@ -1,0 +1,9 @@
+pandas<3
+datasets
+huggingface_hub
+pyarrow
+tqdm
+python-dotenv
+openai
+aiohttp>=3.14.3
+Brotli>=1.2.0

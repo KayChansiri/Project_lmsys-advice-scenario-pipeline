@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper and this repository."
+title: "LMSYS Advice Scenario Sampling Pipeline"
+type: software
+authors:
+  - family-names: "Chansiri"
+    given-names: "Karikarn"
+year: 2026
+license: MIT
