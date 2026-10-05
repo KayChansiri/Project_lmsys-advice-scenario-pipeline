@@ -1,0 +1,36 @@
+# API keys and credentials
+.env
+.env.*
+*.key
+secrets.*
+credentials.*
+
+# Restricted LMSYS-derived data
+data/restricted/*
+!data/restricted/.gitkeep
+
+# Human-review files containing LMSYS source text
+data/human_review/*
+!data/human_review/.gitkeep
+
+# Generated local outputs
+data/processed/*
+!data/processed/.gitkeep
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+
+# Python temporary files
+__pycache__/
+*.py[cod]
+
+# Local Python environments
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
