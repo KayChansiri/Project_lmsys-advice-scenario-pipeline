@@ -133,6 +133,15 @@ data/human_review/lmsys_human_review_batch1.csv
 
 The public repository should **not** include the generated CSV because it contains LMSYS source text. The script is provided so authorized users can regenerate it locally.
 
+## Step 4: Select final study scenarios
+
+Following independent human review and adjudication, the final
+study scenarios are selected from the human-confirmed eligible pool:
+
+```bash
+python src/04_select_final_scenarios.py
+```
+
 ## Human-review fields
 
 The review file contains the following annotation columns:
