@@ -4,7 +4,6 @@ Reproducibility pipeline for LMSYS-Chat-1M advice-scenario construction.
 IMPORTANT
 ---------
 - LMSYS-Chat-1M is gated. Do not redistribute source conversation text.
-- Supply credentials through environment variables; never commit API keys/tokens.
 - These scripts preserve the historical study output basenames used downstream.
 """
 
