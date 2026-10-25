@@ -10,10 +10,7 @@ Study design
 - Annotation model: Claude Sonnet 5.5
 - Annotation effort: high
 - Visible annotation context: MESSAGE + RESPONSE only
-- Response provenance and experimental-condition metadata are withheld.
 - Ratings: 14 dimensions, each coded 0, 1, or 2.
-- max_tokens=500 is an output ceiling, not a requested response length;
-  structured JSON responses are expected to be much shorter.
 - The completed 675 validation annotations are reused unchanged when
   extending annotation to the full 6,750-response dataset.
 
@@ -31,10 +28,6 @@ Outputs
 data/annotation/claude_sonnet55_high_context_validation_ratings_675.csv
 data/annotation/claude_sonnet55_high_context_full_ratings_6750.csv
 
-Note
-----
-The private validation key links blinded coding IDs to generation IDs and
-should not be distributed if doing so would compromise the blinded materials.
 """
 
 from pathlib import Path
@@ -77,8 +70,7 @@ FULL_ANNOTATION_PATH = (
 MODEL = "claude-sonnet-5-5"
 CLAUDE_EFFORT = "high"
 # Upper bound only; this does not request or target a 500-token response.
-# Structured output normally uses far fewer tokens because Claude returns
-# only the 14 integer ratings as JSON.
+# Structured output normally uses far fewer tokens because Claude returns only the 14 integer ratings as JSON.
 MAX_OUTPUT_TOKENS_CAP = 500
 ANNOTATION_CONTEXT = "message_and_response_blinded"
 
