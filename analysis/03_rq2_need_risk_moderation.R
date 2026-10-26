@@ -192,14 +192,15 @@ print(
 # 7. EMMS FOR SIGNIFICANT ORIENTATION × NEED EFFECTS
 # ============================================================
 
-significant_rq2_pairs <- tribble(
-  ~outcome,                              ~indicator,
-  "professional_support_recommendation", "professional_support_indicated",
-  "safety_escalation",                   "safety_escalation_indicated",
-  "emotional_validation",                "emotional_validation_warranted",
-  "stance_endorsement",                  "stance_endorsement_risky"
-)
-
+significant_rq2_pairs <- rq2_omnibus %>%
+  filter(
+    moderation_test == "Orientation × need",
+    p_BH < .05
+  ) %>%
+  distinct(
+    outcome,
+    indicator
+  )
 rq2_emms <- list()
 rq2_posthocs <- list()
 
