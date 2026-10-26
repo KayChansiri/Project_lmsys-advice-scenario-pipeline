@@ -1,7 +1,7 @@
-
 # RQ1: COMMUNICATIVE ORIENTATION × REASONING EFFORT
 # Primary analysis: Linear mixed-effects models (LMMs) with a random intercept for underlying advice-seeking scenario.
-# Clarity is excluded from inferential analysis because all 6,750 responses received the maximum score.
+# Clarity is excluded from inferential analysis because all 6,750   responses received the maximum score.
+
 
 # 1. PACKAGES
 # ============================================================
@@ -11,6 +11,7 @@ library(tibble)
 library(lme4)
 library(lmerTest)
 library(emmeans)
+
 
 # 2. OUTCOMES
 # ============================================================
@@ -30,8 +31,11 @@ outcomes <- c(
   "contextual_tailoring",
   "sycophancy"
 )
+
+
 # 3. FACTOR CODING
 # ============================================================
+
 # Sum-to-zero contrasts are used so that Type III omnibus tests evaluate each main effect averaged across levels of the other experimental factor.
 
 analysis_df$style <- factor(
@@ -61,9 +65,12 @@ print(contrasts(analysis_df$style))
 cat("\nREASONING CONTRASTS\n")
 print(contrasts(analysis_df$reasoning_effort))
 
+
 # 4. PRIMARY RQ1 MODELS
 # ============================================================
-# Model: outcome ~ style * reasoning_effort + (1 | scenario_id)
+
+# Model:
+# outcome ~ style * reasoning_effort + (1 | scenario_id)
 
 models <- list()
 
@@ -84,6 +91,7 @@ for (outcome in outcomes) {
 }
 
 cat("\nAll 13 RQ1 models fitted.\n")
+
 
 # 5. MODEL DIAGNOSTICS
 # ============================================================
@@ -116,7 +124,6 @@ for (outcome in outcomes) {
   )
 
   a <- as.data.frame(a)
-
   a$effect_raw <- rownames(a)
 
   a <- a[
@@ -149,8 +156,12 @@ omnibus_table <- bind_rows(omnibus_list)
 
 stopifnot(nrow(omnibus_table) == 39)
 
+
 # 7. BENJAMINI-HOCHBERG CORRECTION
 # ============================================================
+
+# BH correction is applied jointly across the 39 primary RQ1
+# omnibus tests: 13 outcomes × 3 experimental effects.
 
 omnibus_table$p_BH <- p.adjust(
   omnibus_table$p_raw,
@@ -159,12 +170,9 @@ omnibus_table$p_BH <- p.adjust(
 
 omnibus_table$effect <- recode(
   omnibus_table$effect,
-  "style" =
-    "Communicative orientation",
-  "reasoning_effort" =
-    "Reasoning effort",
-  "style:reasoning_effort" =
-    "Orientation × reasoning"
+  "style" = "Communicative orientation",
+  "reasoning_effort" = "Reasoning effort",
+  "style:reasoning_effort" = "Orientation × reasoning"
 )
 
 cat("\nFULL RQ1 OMNIBUS RESULTS\n")
@@ -177,6 +185,7 @@ print(
   n = 39,
   width = Inf
 )
+
 
 # 8. PUBLICATION TABLE
 # ============================================================
@@ -212,7 +221,8 @@ print(
   width = Inf
 )
 
-# 9. ESTIMATED MARGINAL MEANS: MESSAGE ORIENTATION
+
+# 9. ESTIMATED MARGINAL MEANS: COMMUNICATIVE ORIENTATION
 # ============================================================
 
 orientation_emm_list <- list()
@@ -255,6 +265,7 @@ print(
   width = Inf
 )
 
+
 # 10. ESTIMATED MARGINAL MEANS: REASONING EFFORT
 # ============================================================
 
@@ -277,8 +288,7 @@ for (outcome in outcomes) {
 
   reasoning_emm_list[[outcome]] <- data.frame(
     outcome = outcome,
-    reasoning_effort =
-      emm_df$reasoning_effort,
+    reasoning_effort = emm_df$reasoning_effort,
     EMM = emm_df$emmean,
     SE = emm_df$SE,
     df = emm_df$df,
@@ -303,6 +313,9 @@ print(
 # 11. TUKEY-ADJUSTED PAIRWISE COMPARISONS
 # ============================================================
 
+# Pairwise comparisons are calculated from the same primary models.
+# Tukey adjustment is applied within each outcome/factor family.
+
 orientation_pairwise <- list()
 reasoning_pairwise <- list()
 
@@ -323,7 +336,6 @@ for (outcome in outcomes) {
   orientation_pairwise[[outcome]]$outcome <-
     outcome
 
-
   reasoning_pairwise[[outcome]] <-
     as.data.frame(
       pairs(
@@ -341,10 +353,28 @@ for (outcome in outcomes) {
 }
 
 orientation_pairwise_table <-
-  bind_rows(orientation_pairwise)
+  bind_rows(orientation_pairwise) %>%
+  select(
+    outcome,
+    contrast,
+    estimate,
+    SE,
+    df,
+    t.ratio,
+    p.value
+  )
 
 reasoning_pairwise_table <-
-  bind_rows(reasoning_pairwise)
+  bind_rows(reasoning_pairwise) %>%
+  select(
+    outcome,
+    contrast,
+    estimate,
+    SE,
+    df,
+    t.ratio,
+    p.value
+  )
 
 cat("\nORIENTATION PAIRWISE COMPARISONS\n")
 
@@ -363,7 +393,51 @@ print(
 )
 
 
-# 12. RANDOM EFFECTS AND ICC
+# 12. MANUSCRIPT-REPORTED PAIRWISE COMPARISONS
+# ============================================================
+
+# These subsets provide a direct reproducibility check for the  pairwise comparisons discussed in the RQ1 results text.
+
+manuscript_orientation_pairwise <-
+  orientation_pairwise_table %>%
+  filter(
+    outcome %in%
+      c(
+        "emotional_validation",
+        "tradeoff_analysis"
+      )
+  )
+
+manuscript_reasoning_pairwise <-
+  reasoning_pairwise_table %>%
+  filter(
+    outcome %in%
+      c(
+        "tradeoff_analysis",
+        "uncertainty_acknowledgment",
+        "emotional_validation",
+        "autonomy_support"
+      )
+  )
+
+cat("\nMANUSCRIPT CHECK: ORIENTATION PAIRWISE COMPARISONS\n")
+
+print(
+  as_tibble(manuscript_orientation_pairwise),
+  n = nrow(manuscript_orientation_pairwise),
+  width = Inf
+)
+
+cat("\nMANUSCRIPT CHECK: REASONING PAIRWISE COMPARISONS\n")
+
+print(
+  as_tibble(manuscript_reasoning_pairwise),
+  n = nrow(manuscript_reasoning_pairwise),
+  width = Inf
+)
+
+
+# 13. RANDOM EFFECTS AND ICC
 # ============================================================
 
 random_effects_list <- list()
@@ -394,10 +468,8 @@ for (outcome in outcomes) {
   random_effects_list[[outcome]] <-
     data.frame(
       outcome = outcome,
-      scenario_variance =
-        scenario_variance,
-      residual_variance =
-        residual_variance,
+      scenario_variance = scenario_variance,
+      residual_variance = residual_variance,
       ICC = icc
     )
 }
@@ -414,7 +486,8 @@ print(
   width = Inf
 )
 
-# 13. ICC SUMMARY
+
+# 14. ICC SUMMARY
 # ============================================================
 
 icc_summary <- random_effects_table %>%
@@ -436,8 +509,10 @@ icc_summary <- random_effects_table %>%
 cat("\nICC SUMMARY\n")
 print(icc_summary)
 
-# 14. MESSAGE-LENGTH SENSITIVITY ANALYSIS
+
+# 15. MESSAGE-LENGTH SENSITIVITY ANALYSIS
 # ============================================================
+
 # Message length is treated as a sensitivity covariate rather than part of the primary specification because it is a post-transformation characteristic and may partly reflect the communicative-orientation manipulation itself.
 
 analysis_df <- analysis_df %>%
@@ -468,7 +543,8 @@ for (outcome in outcomes) {
   )
 }
 
-# 15. LENGTH-COVARIATE EFFECTS
+
+# 16. LENGTH-COVARIATE EFFECTS
 # ============================================================
 
 length_effects <- list()
@@ -482,16 +558,19 @@ for (outcome in outcomes) {
   length_effects[[outcome]] <-
     data.frame(
       outcome = outcome,
+
       estimate =
         coef_table[
           "transformed_word_count_z",
           "Estimate"
         ],
+
       SE =
         coef_table[
           "transformed_word_count_z",
           "Std. Error"
         ],
+
       p_raw =
         coef_table[
           "transformed_word_count_z",
@@ -518,7 +597,7 @@ print(
 )
 
 
-# 16. SENSITIVITY OMNIBUS TESTS
+# 17. SENSITIVITY OMNIBUS TESTS
 # ============================================================
 
 sensitivity_omnibus_list <- list()
@@ -573,12 +652,11 @@ print(
   width = Inf
 )
 
-# 17. FINAL SANITY CHECKS
+
+# 18. FINAL SANITY CHECKS
 # ============================================================
 
-cat("\n========================================\n")
-cat("RQ1 SANITY CHECKS\n")
-cat("========================================\n")
+cat("\nRQ1 SANITY CHECKS\n")
 
 cat(
   "Observations:",
@@ -609,15 +687,13 @@ print(
     ) %>%
     group_by(effect) %>%
     summarise(
-      significant_tests =
-        sum(significant),
+      significant_tests = sum(significant),
       total_tests = n(),
       .groups = "drop"
     )
 )
 
 cat("\nICC range:\n")
-
 print(icc_summary)
 
 cat("\nRQ1 analysis complete.\n")
