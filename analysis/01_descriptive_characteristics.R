@@ -206,3 +206,207 @@ stopifnot(
 cat(
   "\nDescriptive-analysis checks completed successfully.\n"
 )
+
+# 7. DOMAIN-SPECIFIC DESCRIPTIVE STATISTICS (Appendix 11)
+
+# Appendix 11 reports raw means and standard deviations for the 13 modeled advice behaviors within each decision domain.
+# Clarity is excluded here because it was invariant across all  responses and therefore excluded from the inferential models.
+
+modeled_outcomes <- c(
+  "collaborative_exploration",
+  "directiveness",
+  "tradeoff_analysis",
+  "uncertainty_acknowledgment",
+  "emotional_validation",
+  "autonomy_support",
+  "stance_endorsement",
+  "professional_support_recommendation",
+  "safety_escalation",
+  "decision_support_utility",
+  "respectfulness",
+  "contextual_tailoring",
+  "sycophancy"
+)
+
+# Calculate raw M and SD for each behavior within each domain
+domain_behavior_descriptives <- analysis_df %>%
+  group_by(human_primary_domain) %>%
+  summarise(
+    across(
+      all_of(modeled_outcomes),
+      list(
+        mean = ~ mean(.x, na.rm = TRUE),
+        sd = ~ sd(.x, na.rm = TRUE)
+      ),
+      .names = "{.col}__{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(
+    cols = -human_primary_domain,
+    names_to = c("outcome", ".value"),
+    names_sep = "__"
+  ) %>%
+  arrange(
+    human_primary_domain,
+    match(outcome, modeled_outcomes)
+  )
+
+
+cat("\n")
+cat("============================================================\n")
+cat("APPENDIX 11: DOMAIN-SPECIFIC DESCRIPTIVE STATISTICS\n")
+cat("============================================================\n")
+
+print(
+  domain_behavior_descriptives,
+  n = Inf,
+  width = Inf
+)
+
+
+# Create manuscript-ready M (SD) values
+appendix11_table <- domain_behavior_descriptives %>%
+  mutate(
+    statistic = sprintf(
+      "%.2f (%.2f)",
+      mean,
+      sd
+    )
+  ) %>%
+  select(
+    outcome,
+    human_primary_domain,
+    statistic
+  ) %>%
+  pivot_wider(
+    names_from = human_primary_domain,
+    values_from = statistic
+  ) %>%
+  arrange(
+    match(outcome, modeled_outcomes)
+  )
+
+
+cat("\n")
+cat("============================================================\n")
+cat("APPENDIX 11: MANUSCRIPT-READY TABLE — M (SD)\n")
+cat("============================================================\n")
+
+print(
+  appendix11_table,
+  n = Inf,
+  width = Inf
+)
+
+
+# Identify the three highest raw means within each domain.
+# This is retained as a descriptive reproducibility output.
+domain_top3_behaviors <- domain_behavior_descriptives %>%
+  group_by(human_primary_domain) %>%
+  slice_max(
+    order_by = mean,
+    n = 3,
+    with_ties = FALSE
+  ) %>%
+  arrange(
+    human_primary_domain,
+    desc(mean)
+  ) %>%
+  ungroup()
+
+
+cat("\n")
+cat("============================================================\n")
+cat("TOP 3 MODELED BEHAVIORS WITHIN EACH DOMAIN\n")
+cat("============================================================\n")
+
+print(
+  domain_top3_behaviors,
+  n = Inf,
+  width = Inf
+)
+
+
+# 8. SAVE DESCRIPTIVE RESULTS
+
+dir.create(
+  "results/descriptives",
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+
+write.csv(
+  original_descriptives,
+  "results/descriptives/original_scenario_descriptives.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  original_descriptives_domain,
+  "results/descriptives/original_scenario_descriptives_by_domain.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  stimulus_descriptives,
+  "results/descriptives/transformed_stimulus_descriptives.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  response_descriptives_overall,
+  "results/descriptives/response_descriptives_overall.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  response_descriptives_condition,
+  "results/descriptives/appendix9_response_descriptives_by_condition.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  distribution_table,
+  "results/descriptives/appendix10_behavior_distributions.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  domain_behavior_descriptives,
+  "results/descriptives/appendix11_domain_behavior_descriptives.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  appendix11_table,
+  "results/descriptives/appendix11_manuscript_table.csv",
+  row.names = FALSE
+)
+
+write.csv(
+  domain_top3_behaviors,
+  "results/descriptives/domain_top3_behaviors.csv",
+  row.names = FALSE
+)
+
+
+cat("\n")
+cat("============================================================\n")
+cat("DESCRIPTIVE RESULTS SAVED\n")
+cat("============================================================\n")
+
+cat(
+  "\nFiles written to results/descriptives/:\n",
+  "\n  original_scenario_descriptives.csv",
+  "\n  original_scenario_descriptives_by_domain.csv",
+  "\n  transformed_stimulus_descriptives.csv",
+  "\n  response_descriptives_overall.csv",
+  "\n  appendix9_response_descriptives_by_condition.csv",
+  "\n  appendix10_behavior_distributions.csv",
+  "\n  appendix11_domain_behavior_descriptives.csv",
+  "\n  appendix11_manuscript_table.csv",
+  "\n  domain_top3_behaviors.csv",
+  "\n"
+)
